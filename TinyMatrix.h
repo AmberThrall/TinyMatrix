@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstring>
+#include <cmath>
 #include <iostream>
 
 namespace TinyMatrix {
@@ -14,6 +15,9 @@ namespace TinyMatrix {
                 for (size_t j = 0; j < N; ++j)
                     this->data[i][j] = val;
             }
+        }
+        Matrix(const Matrix<T,M,N>& other) {
+            memcpy(this->data, other.data, sizeof(data));
         }
         Matrix(T data[M][N]) {
             for (size_t i = 0; i < M; ++i) {
@@ -72,7 +76,7 @@ namespace TinyMatrix {
             return N;
         }
 
-        Matrix<T,N,M> Transpose() {
+        Matrix<T,N,M> Transpose() const {
             Matrix<T,N,M> ret;
             for (size_t r = 0; r < M; ++r) {
                 for (size_t c = 0; c < N; ++c) {
@@ -178,28 +182,57 @@ namespace TinyMatrix {
             }
             return os;
         }
-    private:
+    protected:
         T data[M][N];
     };
 
 #ifdef TINYMATRIX_CPP11
     template<class T, size_t N>
     using SquareMatrix = Matrix<T, N, N>;
-    template<class T, size_t N>
-    using Vector = Matrix<T, N, 1>;
 #endif
 
-    template<class T, size_t N>
-    T DotProduct(Matrix<T,N,1> a, Matrix<T,N,1> b) {
-        return (a.Transpose() * b)(0,0);
-    }
+#ifndef TINYMATRIX_NO_VECTORS
+    template <class T, size_t N>
+    class Vector : public Matrix<T, N, 1> {
+    public:
+        Vector(T v = 0) : Matrix<T,N,1>(v) {
+        }
+        Vector(const Matrix<T,N,1>& other) : Matrix<T,N,1>(other) {
+        }
+        Vector(const T data[N]) {
+            for (size_t i = 0; i < N; ++i)
+                this->data[i][0] = data[i];
+        }
 
+        T Dot(const Vector<T, N>& b) const {
+            const Vector<T,N> &a(*this);
+            return (a.Transpose() * b)(0,0);
+        }
+
+        T Length() const { return Magnitude(); }
+        T Magnitude() const {
+            return T(sqrt(Dot(*this))); 
+        }
+
+        void Normalize() {
+            (*this) * (T(1.0)/Magnitude());
+        }
+        Vector<T,N> Unit() const {
+            return (*this) * (T(1.0)/Magnitude()); 
+        }
+
+        T operator()(size_t i) const { return this->data[i][0]; }
+        T& operator()(size_t i) { return this->data[i][0]; }
+    };
+    
     template<class T>
-    Matrix<T,3,1> CrossProduct(Matrix<T,3,1> a, Matrix<T,3,1> b) {
-        Matrix<T,3,1> ret;
-        ret(0,0) = (a(1,0) * b(2,0) - a(2,0)*b(1,0));
-        ret(1,0) = -(a(0,0) * b(2,0) - a(2,0)*b(0,0));
-        ret(2,0) = (a(0,0) * b(1,0) - a(1,0)*b(0,0));
-        return ret;
+    Vector<T,3> CrossProduct(Vector<T,3> a, Vector<T,3> b) {
+        T res[3] = {
+            (a(1) * b(2) - a(2)*b(1)),
+            -(a(0) * b(2) - a(2)*b(0)),
+            (a(0) * b(1) - a(1)*b(0))
+        };
+        return Vector<T,3>(res);
     }
+#endif
 }
