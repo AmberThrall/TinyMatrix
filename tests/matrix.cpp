@@ -21,4 +21,11 @@ int main() {
 
     Matrix<float,3,4> mat4 = mat3.Resize<3,4>();
     std::cout << "mat4 = \n" << mat4;
+
+    Matrix<float,3,2> mat5 = {
+        1, 2,
+        3, 4,
+        5, 6
+    };
+    std::cout << "mat5 = \n" << mat5;
 }

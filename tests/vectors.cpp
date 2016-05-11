@@ -1,4 +1,3 @@
-#define TINYMATRIX_CPP11
 #include "../TinyMatrix.h"
 
 using namespace TinyMatrix;
@@ -13,4 +12,9 @@ int main() {
     std::cout << "V1 cross V2 = \n" << CrossProduct<float>(V1, V2);
     std::cout << "||V1|| = " << V1.Magnitude() << std::endl;
     std::cout << "v1/||v1|| = \n" << V1.Unit();
+    std::cout << "V1 + V2 = \n" << V1 + V2;
+
+    // C++11's initializer_list:
+    Vector<float, 4> V3 = {1, 2, 3, 4};
+    std::cout << "V3 = \n" << V3;
 }

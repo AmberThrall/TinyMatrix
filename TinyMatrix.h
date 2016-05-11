@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cmath>
 #include <iostream>
+#include <cstdarg>
 
 namespace TinyMatrix {
     template<std::size_t> struct _int2type{};
@@ -27,6 +28,21 @@ namespace TinyMatrix {
                     this->data[i][j] = data[i][j];
             }
         }
+        #ifndef TINYMATRIX_NO_CPP11
+        Matrix(std::initializer_list<T> list) {
+            size_t r = 0, c = 0;
+            for (auto it = std::begin(list); it != std::end(list) && r < M; ++it) {
+                this->data[r][c] = *it;
+                c++;
+                if (c == N) {
+                    c = 0;
+                    r++;
+                    if (r == M)
+                        break;
+                }
+            }
+        }
+        #endif
 
         template<size_t P, size_t R>
         Matrix<T,P,R> Resize() {
@@ -413,6 +429,32 @@ namespace TinyMatrix {
         T data[M][N];
     };
 
+    //HACK? for template recursive functions
+    template<typename T, size_t M, size_t I>
+    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<I>) {
+        // TODO: Elementary operations to reduce?
+        if (M == 0)
+            return T(1);
+        if (M == 1)
+            return matrix(0,0);
+        if (M == 2)
+            return (matrix(0,0) * matrix(1,1) - matrix(0,1) * matrix(1,0));
+
+        T det;
+        float sign = 1;
+        for (size_t i = 0; i < M; ++i) {
+            det += sign * matrix(0,i) * _DeterminantHelper(matrix.RemoveRowAndColumn(0, i), _int2type<I-1>());
+            sign *= -1;
+        }
+
+        return det;
+    }
+
+    template<typename T, size_t M>
+    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<0>) {
+        return T(1);
+    }
+
 #ifndef TINYMATRIX_NO_CPP11
     template<typename T, size_t N>
     using SquareMatrix = Matrix<T, N, N>;
@@ -430,6 +472,14 @@ namespace TinyMatrix {
             for (size_t i = 0; i < N; ++i)
                 this->data[i][0] = data[i];
         }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        Vector(std::initializer_list<T> list) {
+            size_t index = 0;
+            for (auto it = std::begin(list); it != std::end(list) && index < N; ++it)
+                this->data[index++][0] = T(*it);
+        }
+        #endif
 
         T Dot(const Vector<T, N>& b) const {
             const Vector<T,N> &a(*this);
@@ -462,30 +512,4 @@ namespace TinyMatrix {
         return Vector<T,3>(res);
     }
 #endif
-
-    //HACK? for template recursive functions
-    template<typename T, size_t M, size_t I>
-    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<I>) {
-        // TODO: Elementary operations to reduce?
-        if (M == 0)
-            return T(1);
-        if (M == 1)
-            return matrix(0,0);
-        if (M == 2)
-            return (matrix(0,0) * matrix(1,1) - matrix(0,1) * matrix(1,0));
-
-        T det;
-        float sign = 1;
-        for (size_t i = 0; i < M; ++i) {
-            det += sign * matrix(0,i) * _DeterminantHelper(matrix.RemoveRowAndColumn(0, i), _int2type<I-1>());
-            sign *= -1;
-        }
-
-        return det;
-    }
-
-    template<typename T, size_t M>
-    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<0>) {
-        return T(1);
-    }
 }
