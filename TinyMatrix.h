@@ -96,22 +96,6 @@ namespace TinyMatrix {
             return ret;
         }
 
-        Matrix<T,M,N> DivideRow(T value, size_t i) {
-            Matrix<T,M,N> ret(*this);
-            for (size_t j = 0; j < N; ++j) {
-                ret(i,j) /= value;
-            }
-            return ret;
-        }
-
-        Matrix<T,M,N> DivideColumn(T value, size_t j) {
-            Matrix<T,M,N> ret(*this);
-            for (size_t i = 0; i < M; ++i) {
-                ret(i,j) /= value;
-            }
-            return ret;
-        }
-
         // i2 -> v * i1 + i2
         Matrix<T,M,N> AddRowToRow(T v, size_t i1, size_t i2) {
             Matrix<T,M,N> ret(*this);
@@ -202,7 +186,7 @@ namespace TinyMatrix {
 
                 ret = ret.SwapRows(i, r);
                 if (ret(r, lead) != 0) {
-                    ret = ret.DivideRow(ret(r,lead), r);
+                    ret = ret.MultiplyRow(1/ret(r,lead), r);
                 }
                 for (size_t i = 0; i < M; ++i) {
                     if (i != r)
