@@ -62,6 +62,57 @@ namespace TinyMatrix {
                 this->data[i][c] = column(i,0);
         }
 
+        Matrix<T,M-1,N> RemoveRow(size_t i) {
+            Matrix<T,M-1,N> ret;
+
+            size_t indexR = 0;
+            for (size_t r = 0; r < M; ++r) {
+                if (r == i)
+                    continue;
+
+                for (size_t c = 0; c < N; ++c)
+                    ret(indexR, c) = this->data[r][c];
+                indexR++;
+            }
+
+            return ret;
+        }
+
+        Matrix<T,M,N-1> RemoveColumn(size_t j) {
+            Matrix<T,M,N-1> ret;
+
+            for (size_t r = 0; r < M; ++r) {
+                size_t indexC = 0;
+                for (size_t c = 0; c < N; ++c) {
+                    if (c == j)
+                        continue;
+                    ret(r, indexC++) = this->data[r][c];
+                }
+            }
+
+            return ret;
+        }
+
+        Matrix<T,M-1,N-1> RemoveRowColumn(size_t i, size_t j) {
+            Matrix<T,M-1,N-1> ret;
+
+            size_t indexR = 0;
+            for (size_t r = 0; r < M; ++r) {
+                if (r == i)
+                    continue;
+
+                size_t indexC = 0;
+                for (size_t c = 0; c < N; ++c) {
+                    if (c == j)
+                        continue;
+                    ret(indexR, indexC++) = this->data[r][c];
+                }
+                indexR++;
+            }
+
+            return ret;
+        }
+
         T * Raw() {
             return (T*)this->data;
         }
@@ -111,6 +162,58 @@ namespace TinyMatrix {
             if (!IsSquare())
                 throw "Determinant of non-square matrix";
             return _DeterminantHelper(*this, _int2type<M>());
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, T>::type Minor(size_t i, size_t j)
+        #else
+        T Minor(size_t i, size_t j)
+        #endif
+        {
+            return _DeterminantHelper(RemoveRowColumn(i, j), _int2type<M-1>());
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, T>::type Cofactor(size_t i, size_t j)
+        #else
+        T Cofactor(size_t i, size_t j)
+        #endif
+        {
+            return T(pow(-1.0f, i+j)) * Minor(i, j);
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, Matrix<T,M,M>>::type Adjugate()
+        #else
+        Matrix<T,M,M> Adjugate()
+        #endif
+        {
+            Matrix<T,M,M> ret;
+            for (size_t r = 0; r < M; ++r) {
+                for (size_t c = 0; c < M; ++c)
+                    ret(r,c) = Cofactor(r,c);
+            }
+            return ret.Transpose();
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, Matrix<T,M,M>>::type Inverse()
+        #else
+        Matrix<T,M,M> Inverse()
+        #endif
+        {
+            if (!IsSquare())
+                throw "Inverse of non-square matrix";
+
+            T detA = Determinant();
+            if (detA == 0)
+                throw "Inverse of singular matrix";
+
+            return (1 / detA) * Adjugate();
         }
 
         // Static functions
@@ -276,19 +379,9 @@ namespace TinyMatrix {
             return (matrix(0,0) * matrix(1,1) - matrix(0,1) * matrix(1,0));
 
         T det;
-        Matrix<T,M-1,M-1> minorMatrix;
         float sign = 1;
         for (size_t i = 0; i < M; ++i) {
-            for (size_t r = 1; r < M; ++r) {
-                size_t index = 0;
-                for (size_t c = 0; c < M; ++c) {
-                    if (c == i)
-                        continue;
-                    minorMatrix(r-1,index++) = matrix(r,c);
-                }
-            }
-
-            det += sign * matrix(0,i) * _DeterminantHelper(minorMatrix, _int2type<I-1>());
+            det += sign * matrix(0,i) * _DeterminantHelper(matrix.RemoveRowColumn(0, i), _int2type<I-1>());
             sign *= -1;
         }
 
