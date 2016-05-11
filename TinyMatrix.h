@@ -161,7 +161,7 @@ namespace TinyMatrix {
             return ret;
         }
 
-        Matrix<T,M-1,N-1> RemoveRowColumn(size_t i, size_t j) {
+        Matrix<T,M-1,N-1> RemoveRowAndColumn(size_t i, size_t j) {
             Matrix<T,M-1,N-1> ret;
 
             size_t indexR = 0;
@@ -273,7 +273,7 @@ namespace TinyMatrix {
         T Minor(size_t i, size_t j)
         #endif
         {
-            return _DeterminantHelper(RemoveRowColumn(i, j), _int2type<M-1>());
+            return _DeterminantHelper(RemoveRowAndColumn(i, j), _int2type<M-1>());
         }
 
         #ifndef TINYMATRIX_NO_CPP11
@@ -483,7 +483,7 @@ namespace TinyMatrix {
         T det;
         float sign = 1;
         for (size_t i = 0; i < M; ++i) {
-            det += sign * matrix(0,i) * _DeterminantHelper(matrix.RemoveRowColumn(0, i), _int2type<I-1>());
+            det += sign * matrix(0,i) * _DeterminantHelper(matrix.RemoveRowAndColumn(0, i), _int2type<I-1>());
             sign *= -1;
         }
 
