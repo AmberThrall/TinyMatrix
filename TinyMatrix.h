@@ -28,6 +28,16 @@ namespace TinyMatrix {
             }
         }
 
+        template<size_t P, size_t R>
+        Matrix<T,P,R> Resize() {
+            Matrix<T,P,R> ret;
+            for (size_t r = 0; r < M && r < P; ++r) {
+                for (size_t c = 0; c < N && c < R; ++c)
+                    ret(r,c) = this->data[r][c];
+            }
+            return ret;
+        }
+
         Matrix<T,1,N> GetRow(int r) {
             Matrix<T,1,N> ret;
             for (size_t i = 0; i < N; ++i)
