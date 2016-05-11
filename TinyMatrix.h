@@ -54,36 +54,46 @@ namespace TinyMatrix {
             return ret;
         }
 
-        Matrix<T,1,N> GetRow(int r) {
+        template<size_t P, size_t R>
+        Matrix<T,P,R> SubMatrix(size_t i, size_t j) {
+            Matrix<T,P,R> ret;
+            for (size_t r = 0; r < P; ++r) {
+                for (size_t c = 0; c < R; ++c)
+                    ret(r,c) = this->data[r + i][c + j];
+            }
+            return ret;
+        }
+
+        Matrix<T,1,N> GetRow(size_t r) {
             Matrix<T,1,N> ret;
             for (size_t i = 0; i < N; ++i)
                 ret(0,i) = this->data[r][i];
             return ret;
         }
 
-        Matrix<T,M,1> GetColumn(int c) {
+        Matrix<T,M,1> GetColumn(size_t c) {
             Matrix<T,M,1> ret;
             for (size_t i = 0; i < M; ++i)
                 ret(i,0) = this->data[i][c];
             return ret;
         }
 
-        void SetRow(int r, T row[N]) {
+        void SetRow(size_t r, T row[N]) {
             for (size_t i = 0; i < N; ++i)
                 this->data[r][i] = row[i];
         }
 
-        void SetRow(int r, Matrix<T,1,N> row) {
+        void SetRow(size_t r, Matrix<T,1,N> row) {
             for (size_t i = 0; i < N; ++i)
                 this->data[r][i] = row(0,i);
         }
 
-        void SetColumn(int c, T column[M]) {
+        void SetColumn(size_t c, T column[M]) {
             for (size_t i = 0; i < M; ++i)
                 this->data[i][c] = column[i];
         }
 
-        void SetColumn(int c, Matrix<T,M,1> column) {
+        void SetColumn(size_t c, Matrix<T,M,1> column) {
             for (size_t i = 0; i < M; ++i)
                 this->data[i][c] = column(i,0);
         }

@@ -22,10 +22,14 @@ int main() {
     Matrix<float,3,4> mat4 = mat3.Resize<3,4>();
     std::cout << "mat4 = \n" << mat4;
 
+    // initializer_list
     Matrix<float,3,2> mat5 = {
         1, 2,
         3, 4,
         5, 6
     };
     std::cout << "mat5 = \n" << mat5;
+
+    auto mat6 = mat3.SubMatrix<2,2>(0,1);
+    std::cout << "mat6 = \n" << mat6;
 }
