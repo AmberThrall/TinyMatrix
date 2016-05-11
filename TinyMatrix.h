@@ -7,7 +7,9 @@
 #include <iostream>
 
 namespace TinyMatrix {
-    template<class T, size_t M, size_t N>
+    template<std::size_t> struct _int2type{};
+
+    template<typename T, size_t M, size_t N>
     struct Matrix {
     public:
         Matrix(T val = 0) {
@@ -71,7 +73,7 @@ namespace TinyMatrix {
         size_t NumRows() {
             return M;
         }
-        
+
         size_t NumColumns() {
             return N;
         }
@@ -86,6 +88,32 @@ namespace TinyMatrix {
             return ret;
         }
 
+        // Square Matrix functions
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, bool>::type IsSingular()
+        #else
+        bool IsSingular()
+        #endif
+        {
+            if (!IsSquare())
+                return false;
+            return (Determinant() == 0);
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, T>::type Determinant()
+        #else
+        T Determinant()
+        #endif
+        {
+            if (!IsSquare())
+                throw "Determinant of non-square matrix";
+            return _DeterminantHelper(*this, _int2type<M>());
+        }
+
+        // Static functions
         static Matrix<T,M,M> Identity() {
             Matrix<T,M,M> ret;
             for (size_t r = 0; r < M; ++r) {
@@ -186,13 +214,13 @@ namespace TinyMatrix {
         T data[M][N];
     };
 
-#ifdef TINYMATRIX_CPP11
-    template<class T, size_t N>
+#ifndef TINYMATRIX_NO_CPP11
+    template<typename T, size_t N>
     using SquareMatrix = Matrix<T, N, N>;
 #endif
 
 #ifndef TINYMATRIX_NO_VECTORS
-    template <class T, size_t N>
+    template <typename T, size_t N>
     class Vector : public Matrix<T, N, 1> {
     public:
         Vector(T v = 0) : Matrix<T,N,1>(v) {
@@ -211,20 +239,20 @@ namespace TinyMatrix {
 
         T Length() const { return Magnitude(); }
         T Magnitude() const {
-            return T(sqrt(Dot(*this))); 
+            return T(sqrt(Dot(*this)));
         }
 
         void Normalize() {
             (*this) * (T(1.0)/Magnitude());
         }
         Vector<T,N> Unit() const {
-            return (*this) * (T(1.0)/Magnitude()); 
+            return (*this) * (T(1.0)/Magnitude());
         }
 
         T operator()(size_t i) const { return this->data[i][0]; }
         T& operator()(size_t i) { return this->data[i][0]; }
     };
-    
+
     template<class T>
     Vector<T,3> CrossProduct(Vector<T,3> a, Vector<T,3> b) {
         T res[3] = {
@@ -235,4 +263,40 @@ namespace TinyMatrix {
         return Vector<T,3>(res);
     }
 #endif
+
+    //HACK? for template recursive functions
+    template<typename T, size_t M, size_t I>
+    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<I>) {
+        // TODO: Elementary operations to reduce?
+        if (M == 0)
+            return T(1);
+        if (M == 1)
+            return matrix(0,0);
+        if (M == 2)
+            return (matrix(0,0) * matrix(1,1) - matrix(0,1) * matrix(1,0));
+
+        T det;
+        Matrix<T,M-1,M-1> minorMatrix;
+        float sign = 1;
+        for (size_t i = 0; i < M; ++i) {
+            for (size_t r = 1; r < M; ++r) {
+                size_t index = 0;
+                for (size_t c = 0; c < M; ++c) {
+                    if (c == i)
+                        continue;
+                    minorMatrix(r-1,index++) = matrix(r,c);
+                }
+            }
+
+            det += sign * matrix(0,i) * _DeterminantHelper(minorMatrix, _int2type<I-1>());
+            sign *= -1;
+        }
+
+        return det;
+    }
+
+    template<typename T, size_t M>
+    T _DeterminantHelper(Matrix<T,M,M> matrix, _int2type<0>) {
+        return T(1);
+    }
 }
