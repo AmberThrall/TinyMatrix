@@ -62,6 +62,74 @@ namespace TinyMatrix {
                 this->data[i][c] = column(i,0);
         }
 
+        Matrix<T,M,N> SwapRows(size_t i1, size_t i2) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t j = 0; j < N; ++j) {
+                ret(i1,j) = this->data[i2][j];
+                ret(i2,j) = this->data[i1][j];
+            }
+            return ret;
+        }
+
+        Matrix<T,M,N> SwapColumns(size_t j1, size_t j2) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t i = 0; i < M; ++i) {
+                ret(i,j1) = this->data[i][j2];
+                ret(i,j2) = this->data[i][j1];
+            }
+            return ret;
+        }
+
+        Matrix<T,M,N> MultiplyRow(T value, size_t i) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t j = 0; j < N; ++j) {
+                ret(i,j) *= value;
+            }
+            return ret;
+        }
+
+        Matrix<T,M,N> MultiplyColumn(T value, size_t j) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t i = 0; i < M; ++i) {
+                ret(i,j) *= value;
+            }
+            return ret;
+        }
+
+        Matrix<T,M,N> DivideRow(T value, size_t i) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t j = 0; j < N; ++j) {
+                ret(i,j) /= value;
+            }
+            return ret;
+        }
+
+        Matrix<T,M,N> DivideColumn(T value, size_t j) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t i = 0; i < M; ++i) {
+                ret(i,j) /= value;
+            }
+            return ret;
+        }
+
+        // i2 -> v * i1 + i2
+        Matrix<T,M,N> AddRowToRow(T v, size_t i1, size_t i2) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t j = 0; j < N; ++j) {
+                ret(i2,j) = v * this->data[i1][j] + this->data[i2][j];
+            }
+            return ret;
+        }
+
+        // j2 -> v * j1 + j2
+        Matrix<T,M,N> AddColumnToColumn(T v, size_t j1, size_t j2) {
+            Matrix<T,M,N> ret(*this);
+            for (size_t i = 0; i < M; ++i) {
+                ret(i,j2) = v * this->data[i][j1] + this->data[i][j2];
+            }
+            return ret;
+        }
+
         Matrix<T,M-1,N> RemoveRow(size_t i) {
             Matrix<T,M-1,N> ret;
 
@@ -108,6 +176,40 @@ namespace TinyMatrix {
                     ret(indexR, indexC++) = this->data[r][c];
                 }
                 indexR++;
+            }
+
+            return ret;
+        }
+
+        Matrix<T,M,N> GaussJordan() {
+            Matrix<T,M,N> ret(*this);
+
+            size_t lead = 0;
+            for (size_t r = 0; r < M; r++) {
+                if (lead >= N)
+                    break;
+
+                size_t i = r;
+                while (ret(i, lead) == 0) {
+                    i++;
+                    if (i >= M) {
+                        i = r;
+                        lead++;
+                        if (lead >= N)
+                            return ret;
+                    }
+                }
+
+                ret = ret.SwapRows(i, r);
+                if (ret(r, lead) != 0) {
+                    ret = ret.DivideRow(ret(r,lead), r);
+                }
+                for (size_t i = 0; i < M; ++i) {
+                    if (i != r)
+                        ret = ret.AddRowToRow(-ret(i,lead), r, i);
+                }
+
+                lead++;
             }
 
             return ret;
