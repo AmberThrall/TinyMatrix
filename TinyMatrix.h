@@ -1,11 +1,57 @@
-// LEGAL SHIT HERE
+/*
+    TinyMatrix.h - zlib - Amber Thrall <amber.rose.thrall@gmail.com>
+
+ABOUT:
+    All-in-one C++11 MxN matrix header file. Includes several matrix operations such as: determinant, cofactor, inverse,
+    adjugate, Gauss-Jordan elimination, etc. Also includes all basic operators such as addition, subtraction, scalars and multiplication.
+    All matrices are stored in a single templated struct passing in a type for the data, and the dimension. Also includes an optional
+    implementation of vectors, treating them as Nx1 matrices.
+
+LICENSE: (zlib)
+    Copyright (c) 2016 Amber Thrall
+
+    This software is provided 'as-is', without any express or implied warranty. In no
+    event will the authors be held liable for any damages arising from the use of this software.
+
+    Permission is granted to anyone to use this software for any purpose, including commercial applications,
+    and to alter it and redistribute it freely, subject to the following restrictions:
+
+    1.  The origin of this software must not be misrepresented; you must not claim that you wrote the original
+        software. If you use this software in a product, an acknowledgment in the product documentation would be
+        appreciated but is not required.
+    2.  Altered source versions must be plainly marked as such, and must not be misrepresented as being the
+        original software.
+    3.  This notice may not be removed or altered from any source distribution.
+
+DEFINES:
+    TINYMATRIX_NO_CPP11
+        Disables all features which require C++11 compilers and attempts to use an alternate representation. This includes things
+        such as: using std::initializer_list to initialize matrices and vectors, use of std::enable_if to only define functions
+        which require a square matrix on square matrices (without C++11 it will throw an exception), and defining an alias for
+        NxN matrices (SquareMatrix).
+
+    TINYMATRIX_NO_VECTORS
+        Disables the vector class. The vector struct is represented as an Nx1 matrix and includes typical vector operations such as:
+        dot product, cross product, and magnitude. As well as all other matrix operations for non-square matrices.
+
+    TINYMATRIX_NO_COUT
+        Disables the std::ostream operator for use with std::cout/std::cerr, also removes the inclusion of the header <iostream>.
+*/
 
 #pragma once
 
 #include <cstring>
 #include <cmath>
-#include <iostream>
 #include <cstdarg>
+
+#ifndef TINYMATRIX_NO_CPP11
+#include <type_traits>
+#include <initializer_list>
+#endif
+
+#ifndef TINYMATRIX_NO_COUT
+#include <iostream>
+#endif
 
 namespace TinyMatrix {
     template<std::size_t> struct _int2type{};
@@ -449,6 +495,7 @@ namespace TinyMatrix {
             return ret;
         }
 
+        #ifndef TINYMATRIX_NO_COUT
         friend std::ostream& operator<<(std::ostream& os, const Matrix<T,M,N> mat) {
             for (size_t r = 0; r < M; ++r) {
                 os << "[ ";
@@ -458,6 +505,7 @@ namespace TinyMatrix {
             }
             return os;
         }
+        #endif
     protected:
         T data[M][N];
     };
@@ -495,7 +543,7 @@ namespace TinyMatrix {
 
 #ifndef TINYMATRIX_NO_VECTORS
     template <typename T, size_t N>
-    class Vector : public Matrix<T, N, 1> {
+    struct Vector : public Matrix<T, N, 1> {
     public:
         Vector(T v = 0) : Matrix<T,N,1>(v) {
         }
