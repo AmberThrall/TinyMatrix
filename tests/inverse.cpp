@@ -13,6 +13,7 @@ int main() {
     std::cout << "a = \n" << a;
     std::cout << "det(a) = " << a.Determinant() << (a.IsSingular() ? " (singular)" : " (nonsingular)") << std::endl;
     std::cout << "minor(a,0,0) = " << a.Minor(0,0) << std::endl;
+    std::cout << "trace(a) = " << a.Trace() << std::endl;
 
     float b_data[3][3] = {
         { 3, 5, 2 },

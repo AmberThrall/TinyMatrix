@@ -293,6 +293,8 @@ namespace TinyMatrix {
         T Minor(size_t i, size_t j)
         #endif
         {
+            if (!IsSquare())
+                throw "Minor of non-square matrix";
             return _DeterminantHelper(RemoveRowAndColumn(i, j), _int2type<M-1>());
         }
 
@@ -303,6 +305,8 @@ namespace TinyMatrix {
         T Cofactor(size_t i, size_t j)
         #endif
         {
+            if (!IsSquare())
+                throw "Cofactor of non-square matrix";
             return T(pow(-1.0f, i+j)) * Minor(i, j);
         }
 
@@ -313,6 +317,9 @@ namespace TinyMatrix {
         Matrix<T,M,M> Adjugate()
         #endif
         {
+            if (!IsSquare())
+                throw "Adjugate of non-square matrix";
+
             Matrix<T,M,M> ret;
             for (size_t r = 0; r < M; ++r) {
                 for (size_t c = 0; c < M; ++c)
@@ -336,6 +343,22 @@ namespace TinyMatrix {
                 throw "Inverse of singular matrix";
 
             return (1 / detA) * Adjugate();
+        }
+
+        #ifndef TINYMATRIX_NO_CPP11
+        template<size_t m = M, size_t n = N>
+        typename std::enable_if<m == n, T>::type Trace()
+        #else
+        T Trace()
+        #endif
+        {
+            if (!IsSquare())
+                throw "Trace of non-square matrix";
+
+            T sum = 0;
+            for (size_t i = 0; i < M; ++i)
+                sum += this->data[i][i];
+            return sum;
         }
 
         // Static functions
