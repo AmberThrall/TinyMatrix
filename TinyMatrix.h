@@ -563,8 +563,9 @@ namespace TinyMatrix {
         #endif
 
         T Dot(const Vector<T, N>& b) const {
-            const Vector<T,N> &a(*this);
-            return (a.Transpose() * b)(0,0);
+            const Matrix<T,N,1> &a(*this);
+            const Matrix<T,N,1> b_mat = b;
+            return (a.Transpose() * b_mat)(0,0);
         }
 
         T Length() const { return Magnitude(); }
@@ -581,6 +582,12 @@ namespace TinyMatrix {
 
         T operator()(size_t i) const { return this->data[i][0]; }
         T& operator()(size_t i) { return this->data[i][0]; }
+
+        template<size_t M>
+        friend Vector<T,M> operator*(const Matrix<T,M,N>& lhs, const Vector<T,N>& rhs) {
+            Matrix<T,M,1> product = lhs * (const Matrix<T,N,1>)rhs;
+            return Vector<T,M>(product);
+        }
     };
 
     template<class T>

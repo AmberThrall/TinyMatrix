@@ -14,6 +14,13 @@ int main() {
     std::cout << "v1/||v1|| = \n" << V1.Unit();
     std::cout << "V1 + V2 = \n" << V1 + V2;
 
+    Matrix<float, 3, 3> matrix = {
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9
+    };
+    std::cout << "matrix * v1 = \n" << matrix * V1;
+
     // C++11's initializer_list:
     Vector<float, 4> V3 = {1, 2, 3, 4};
     std::cout << "V3 = \n" << V3;
