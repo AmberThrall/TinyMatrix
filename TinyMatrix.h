@@ -576,8 +576,15 @@ namespace TinyMatrix {
         void Normalize() {
             (*this) * (T(1.0)/Magnitude());
         }
+
         Vector<T,N> Unit() const {
             return (*this) * (T(1.0)/Magnitude());
+        }
+
+        static Vector<T,N> Basis(size_t i) {
+            Vector<T,N> ret;
+            ret(i) = 1;
+            return ret;
         }
 
         T operator()(size_t i) const { return this->data[i][0]; }
