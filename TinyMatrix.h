@@ -36,6 +36,9 @@ DEFINES:
 
     TINYMATRIX_NO_COUT
         Disables the std::ostream operator for use with std::cout/std::cerr, also removes the inclusion of the header <iostream>.
+
+    TINYMATRIX_NO_UTF8
+      Disables UTF-8 output for std::cout. Requires TINYMATRIX_NO_COUT to not be defined.
 */
 
 #pragma once
@@ -498,10 +501,32 @@ namespace TinyMatrix {
         #ifndef TINYMATRIX_NO_COUT
         friend std::ostream& operator<<(std::ostream& os, const Matrix<T,M,N> mat) {
             for (size_t r = 0; r < M; ++r) {
+              #ifdef TINYMATRIX_NO_UTF8
                 os << "[ ";
+              #else
+                if (M == 1)
+                  os << "[ ";
+                else if (r == 0)
+                  os << "⎡ ";
+                else if (r == M-1)
+                  os << "⎣ ";
+                else if (M > 1)
+                  os << "⎢ ";
+              #endif
                 for (size_t c = 0; c < N; ++c)
                     os << mat(r,c) << " ";
-                os << "] " << std::endl;
+                #ifdef TINYMATRIX_NO_UTF8
+                  os << "] " << std::endl;
+                #else
+                  if (M == 1)
+                    os << "] " << std::endl;
+                  else if (r == 0)
+                    os << "⎤ " << std::endl;
+                  else if (r == M-1)
+                    os << "⎦ " << std::endl;
+                  else
+                    os << "⎥ " << std::endl;
+                #endif
             }
             return os;
         }
