@@ -250,7 +250,7 @@ namespace TinyMatrix {
             return ret;
         }
 
-        Matrix<T,M,N> GaussJordan() {
+        Matrix<T,M,N> RowReduce() {
             Matrix<T,M,N> ret(*this);
 
             size_t lead = 0;
@@ -423,7 +423,8 @@ namespace TinyMatrix {
             }
             return ret;
         }
-
+        
+        // Operators
         Matrix<T,M,N>& operator=(const Matrix<T,M,N>& other) { // copy
             if (this != &other) {
                 for (size_t r = 0; r < M; ++r) {
