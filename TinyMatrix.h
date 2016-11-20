@@ -423,7 +423,19 @@ namespace TinyMatrix {
             }
             return ret;
         }
-        
+
+        template<size_t P, size_t Q>
+        static Matrix<T,M,P+Q> Augmented(Matrix<T,M,P> a, Matrix<T,M,Q> b) {
+            Matrix<T,M,P+Q> ret;
+            for (size_t r = 0; r < M; ++r) {
+                for (size_t c = 0; c < P; ++c)
+                    ret(r,c) = a(r,c);
+                for (size_t c = 0; c < Q; ++c)
+                    ret(r,P+c) = b(r,c);
+            }
+            return ret;
+        }
+
         // Operators
         Matrix<T,M,N>& operator=(const Matrix<T,M,N>& other) { // copy
             if (this != &other) {
